@@ -1,0 +1,54 @@
+# 🔥 GCM-UNet: Infrared Gas Detection Network
+
+[![PyTorch](https://img.shields.io/badge/PyTorch-1.12%2B-ee4c2c?logo=pytorch)](https://pytorch.org/)
+[![Python](https://img.shields.io/badge/Python-3.9-3776ab?logo=python)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Gitee](https://img.shields.io/badge/Gitee-Repo-c71d23)](https://gitee.com/your-username/gas-detection)
+
+> **基于全局上下文模块 (GCM) 与通道注意力门控 (Channel AG) 的红外气体弱目标分割网络**
+
+## 📖 项目介绍 (Introduction)
+
+本项目针对红外气体成像中**目标特征微弱、背景噪声复杂**的问题，提出了一种改进的 U-Net 架构——**GCM-UNet**。
+
+传统的 U-Net 在跳跃连接（Skip Connection）中直接融合特征，容易引入大量背景噪声。本项目引入了两个核心改进：
+1.  **Global Context Module (GCM):** 在瓶颈层捕获全局上下文信息。
+2.  **Channel Attention Gate (AG):** 在跳跃连接中引入通道注意力机制，自动筛选有效特征通道，抑制噪声。
+
+---
+
+## 🏗️ 网络架构 (Network Architecture)
+
+### 1. 整体架构 (Overall Architecture)
+如下图所示，GCM-UNet 基于 Encoder-Decoder 结构。我们在 Encoder 和 Decoder 之间的跳跃连接路径上嵌入了 AG 模块，并在最深层特征处嵌入了 GCM 模块。
+
+![GCM-UNet Architecture](./arch_overall.png)
+*(图 2: GCM-UNet 整体网络架构图)*
+
+### 2. 核心组件：通道注意力门控 (Channel Attention Gate)
+不同于传统的空间注意力，我们采用了**基于通道的注意力机制**（如下图）。
+
+* **多路特征压缩:** 利用 `AdaptiveMaxPool` 和 `AdaptiveAvgPool` 并行提取特征的纹理与背景信息。
+* **特征重校准:** 通过共享 MLP 学习通道间的非线性关系，生成通道权重，对 Encoder 的特征进行“清洗”和“重加权”。
+
+![Attention Mechanism](./arch_ag.png)
+*(图 4: 注意力门控机制架构图)*
+
+---
+
+## 🛠️ 环境依赖 (Requirements)
+
+本项目建议在拥有 NVIDIA GPU 的环境下运行。
+
+* **System:** Windows / Linux
+* **Python:** 3.8+
+* **CUDA:** 11.x (Recommended for RTX 3090)
+
+主要依赖库：
+```bash
+torch>=1.12.0
+torchvision>=0.13.0
+numpy
+opencv-python
+matplotlib
+tqdm
